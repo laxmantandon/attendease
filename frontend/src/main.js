@@ -10,9 +10,13 @@ import Auth from "../../../doppio/libs/controllers/auth";
 
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
+// import './scss/variables.scss'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+
+import Vue3EasyDataTable from 'vue3-easy-data-table';
+import 'vue3-easy-data-table/dist/style.css';
 
 const attendease = {
 	dark: false,
@@ -44,7 +48,7 @@ const vuetify = createVuetify({
 const app = createApp(App);
 const auth = reactive(new Auth());
 
-
+app.component('EasyDataTable', Vue3EasyDataTable);
 // Plugins
 app.use(router);
 app.use(resourceManager);

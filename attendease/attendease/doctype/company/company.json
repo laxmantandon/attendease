@@ -7,11 +7,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company_information_section",
   "company_name",
   "address_line_1",
   "address_line_2",
   "state",
   "country",
+  "column_break_6",
+  "abbr",
   "gstin",
   "pan",
   "contact"
@@ -30,11 +33,13 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "State"
   },
   {
    "fieldname": "country",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Country"
   },
   {
@@ -57,10 +62,26 @@
    "fieldtype": "Data",
    "label": "Company Name",
    "unique": 1
+  },
+  {
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Abbr",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company_information_section",
+   "fieldtype": "Section Break",
+   "label": "Company Information"
   }
  ],
  "links": [],
- "modified": "2023-02-06 16:27:44.221950",
+ "modified": "2023-03-19 18:13:43.226416",
  "modified_by": "Administrator",
  "module": "attendease",
  "name": "Company",

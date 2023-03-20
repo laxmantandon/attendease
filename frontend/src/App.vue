@@ -11,7 +11,7 @@
 			
 			<side-bar v-model="drawer" v-if="$auth.isLoggedIn"></side-bar>
 
-			<v-app-bar app>
+			<v-app-bar app v-if="$auth.isLoggedIn">
 				<v-app-bar-nav-icon @click.stop="drawer = !drawer">
 					
 				</v-app-bar-nav-icon>

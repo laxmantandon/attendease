@@ -3,7 +3,8 @@
     <v-row justify="center" align="center">
       <v-col cols="12" xs="11" sm="10" md="6" lg="4" xl="6">
         <v-sheet elevation="10" class="ma-6 pa-6" rounded="lg">
-        <h1>Sign In</h1>
+        <h2>Sign-in</h2>
+        <br>
           <v-form ref="form">
             <v-text-field variant="outlined" v-model="email" :rules="emailRules" label="Email" required
               append-inner-icon="mdi-account"

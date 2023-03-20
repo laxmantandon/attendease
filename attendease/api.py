@@ -236,3 +236,85 @@ def ng_write_file(data, filename, docname, doctype, file_type):
     except Exception as e:
         frappe.log_error(str(e))
         return e
+    
+    
+@frappe.whitelist(allow_guest=True)
+def clock_in():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    if frappe.request.method =="GET":
+        employee_id = get_employee_from_userid(user_email)
+        attendance_log = frappe.db.get_all("Attendance Log", fields=["name", "clock_in", "clock_out", "working_hours", "gps"], filters={"employee": employee_id})
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : attendance_log
+        }
+        return
+    
+    elif frappe.request.method == "POST":
+        _data = frappe.request.json
+        employee_id = get_employee_from_userid(user_email)
+        
+        if employee_id == False:
+            frappe.response["message"] = {
+                "status": False,
+                "message": "User is not linked with Employee",
+                "user_email": user_email
+            }
+            return
+        
+        log = frappe.db.get_all("Attendance Log", filters={"posting_date": _data.get("posting_date")}, fields=["name", "clock_in", "clock_out", "working_hours", "gps"], order_by='creation desc')
+        if len(log) > 0:
+            frappe.response["message"] = {
+                "status":True,
+                "message": "User Has Already Clocked In for the date",
+                "data": log[0]
+            }
+            return
+        
+        doc = frappe.get_doc({
+            "doctype":"Attendance Log",
+            "posting_date": frappe.utils.nowdate(),
+            "clock_in": frappe.utils.now(),
+            "employee": employee_id
+        })
+        doc.insert()
+        doc.save()
+        frappe.db.commit()
+
+        frappe.response["message"] = {
+            "status":True,
+            "message": "Clock in Success",
+            "data": doc
+        }
+        return
+    
+    elif frappe.request.method == "PUT":
+        payload = frappe.request.json
+        doc = frappe.get_doc('Attendance Log', payload['name'])
+        doc.clock_out = frappe.utils.now()
+
+        doc.save(ignore_permissions=True)
+        frappe.response["message"] = {
+            "status":True,
+            "message": "Updated Successfully",
+        }
+        
+        return
+
+def get_employee_from_userid(email):
+    employee = frappe.db.get_all("Employee", fields=["name"], filters={"user_id": email})
+    if employee: 
+        return employee[0].name
+    else: 
+        return False

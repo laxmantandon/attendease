@@ -25,7 +25,8 @@
   "column_break_16",
   "completed_on",
   "section_break_18",
-  "task_description"
+  "task_description",
+  "employee"
  ],
  "fields": [
   {
@@ -117,11 +118,17 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-20 17:08:43.706664",
+ "modified": "2023-03-21 19:06:18.583969",
  "modified_by": "Administrator",
  "module": "attendease",
  "name": "Task",

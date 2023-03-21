@@ -312,6 +312,122 @@ def clock_in():
         
         return
 
+@frappe.whitelist(allow_guest=True)
+def task():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    if frappe.request.method =="GET":
+        employee_id = get_employee_from_userid(user_email)
+        task = frappe.db.get_all("Task", fields=["*"], filters={"employee": employee_id})
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : task
+        }
+        return
+    
+    elif frappe.request.method == "POST":
+        _data = frappe.request.json
+        employee_id = get_employee_from_userid(user_email)
+        
+        if employee_id == False:
+            frappe.response["message"] = {
+                "status": False,
+                "message": "User is not linked with Employee",
+                "user_email": user_email
+            }
+            return
+                
+        doc = frappe.get_doc({
+            "doctype":"Task",
+            "type": _data.get("type"),
+            "subject": _data.get("subject"),
+            "status": _data.get("status"),
+            "project": _data.get("project"),
+            "expected_start_date": _data.get("expected_start_date"),
+            "expected_end_date": _data.get("expected_end_date"),
+            "completed_on": _data.get("completed_on"),
+            "task_description": _data.get("task_description"),
+            "employee": employee_id
+        })
+        doc.insert(ignore_permissions=True)
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        frappe.response["message"] = {
+            "status":True,
+            "message": "Task Added Success",
+            "data": doc
+        }
+        return
+    
+    elif frappe.request.method == "PUT":
+        payload = frappe.request.json
+        doc = frappe.get_doc('Task', payload['name'])
+
+        doc.save(ignore_permissions=True)
+        frappe.response["message"] = {
+            "status":True,
+            "message": "Updated Successfully",
+        }
+        
+        return
+
+@frappe.whitelist(allow_guest=True)
+def task_type():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    if frappe.request.method =="GET":
+        task_type = frappe.db.get_all("Task Type", fields=["name"])
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : task_type
+        }
+        return
+
+@frappe.whitelist(allow_guest=True)
+def projects():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    if frappe.request.method =="GET":
+        projects = frappe.db.get_all("Project", fields=["*"])
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : projects
+        }
+        return
+
+
+
 def get_employee_from_userid(email):
     employee = frappe.db.get_all("Employee", fields=["name"], filters={"user_id": email})
     if employee: 

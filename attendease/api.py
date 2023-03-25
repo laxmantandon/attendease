@@ -314,6 +314,30 @@ def clock_in():
         return
 
 @frappe.whitelist(allow_guest=True)
+def clock_in_today():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    if frappe.request.method =="GET":
+        employee_id = get_employee_from_userid(user_email)
+        attendance_log = frappe.db.get_all("Attendance Log", fields=["name", "clock_in", "clock_out", "working_hours", "gps"], filters={"employee": employee_id, "posting_date": frappe.utils.today()})
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : attendance_log
+        }
+        return
+
+
+@frappe.whitelist(allow_guest=True)
 def task():
     api_key  = frappe.request.headers.get("Authorization")[6:21]
     api_sec  = frappe.request.headers.get("Authorization")[22:]

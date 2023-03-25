@@ -470,6 +470,8 @@ def dashboard():
         if tasks:
             for t in tasks:
                 planned.append({"x": t.weekindex, "y": t.total_task})
+
+            for t in tasks:
                 completed.append({"x": t.weekindex, "y": t.completed_task})
 
         frappe.response["message"] = {

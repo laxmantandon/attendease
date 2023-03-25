@@ -138,7 +138,8 @@ def validate_otp(mobile_no, otp):
                 "last_name": userm[0].last_name,
                 "mobile_no": userm[0].mobile_no,
                 "email_id": userm[0].email,
-                "role": userm[0].user_type
+                "role": userm[0].user_type,
+                "image": _user_image
             }
             }
             return
@@ -423,6 +424,68 @@ def projects():
             "status":True,
             "message": "",
             "data" : projects
+        }
+        return
+
+
+@frappe.whitelist(allow_guest=True)
+def dashboard():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    employee_id = get_employee_from_userid(user_email)
+        
+    if employee_id == False:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "User is not linked with Employee",
+            "user_email": user_email
+        }
+        return
+
+    if frappe.request.method =="GET":
+        
+        tasks = frappe.db.sql("""
+             SELECT
+                CONCAT("Week-",WEEK(creation)) AS weekindex,
+                COALESCE(count(creation), 0) total,
+                COALESCE(
+                CASE 
+                    WHEN
+                        STATUS <> "Completed" THEN 
+                            COUNT(creation)
+                END, 0) pending,
+                COALESCE(
+                CASE 
+                    WHEN
+                        STATUS = "Completed" THEN 
+                            COUNT(creation)
+                END, 0) completed
+            FROM tabTask
+            WHERE employee = %s
+            GROUP BY weekindex
+        """, employee_id, as_dict=1)
+        
+        planned = []
+        completed = []
+        
+        if tasks:
+            for t in tasks:
+                planned.append({"x": t.weekindex, "y": t.total})
+                completed.append({"x": t.weekindex, "y": t.completed})
+
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : {"planned": planned, "actual": completed}
         }
         return
 

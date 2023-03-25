@@ -455,23 +455,12 @@ def dashboard():
         
         tasks = frappe.db.sql("""
              SELECT
-                CONCAT("Week-",WEEK(creation)) AS weekindex,
-                COALESCE(count(creation), 0) total,
-                COALESCE(
-                CASE 
-                    WHEN
-                        STATUS <> "Completed" THEN 
-                            COUNT(creation)
-                END, 0) pending,
-                COALESCE(
-                CASE 
-                    WHEN
-                        STATUS = "Completed" THEN 
-                            COUNT(creation)
-                END, 0) completed
-            FROM tabTask
-            WHERE employee = %s
-            GROUP BY weekindex
+                CONCAT("Week-", WEEK(creation)) AS weekindex,
+                COUNT(creation) total,
+                status
+            FROM `tabTask`
+            WHERE `employee` = %s
+            GROUP BY weekindex, status
         """, employee_id, as_dict=1)
         
         planned = []
@@ -479,8 +468,10 @@ def dashboard():
         
         if tasks:
             for t in tasks:
-                planned.append({"x": t.weekindex, "y": t.total})
-                completed.append({"x": t.weekindex, "y": t.completed})
+                if t.status == "Completed":
+                    planned.append({"x": t.weekindex, "y": t.total})
+                else:
+                    completed.append({"x": t.weekindex, "y": t.total})
 
         frappe.response["message"] = {
             "status":True,

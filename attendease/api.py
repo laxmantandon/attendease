@@ -454,13 +454,13 @@ def dashboard():
     if frappe.request.method =="GET":
         
         tasks = frappe.db.sql("""
-             SELECT
+            SELECT
                 CONCAT("Week-", WEEK(creation)) AS weekindex,
                 COUNT(creation) total,
-                status
+                CASE WHEN STATUS = "Completed" THEN "Completed" ELSE "Pending" END AS st
             FROM `tabTask`
             WHERE `employee` = %s
-            GROUP BY weekindex, status
+            GROUP BY weekindex, st
         """, employee_id, as_dict=1)
         
         planned = []
@@ -468,7 +468,7 @@ def dashboard():
         
         if tasks:
             for t in tasks:
-                if t.status == "Completed":
+                if t.st == "Completed":
                     planned.append({"x": t.weekindex, "y": t.total})
                 else:
                     completed.append({"x": t.weekindex, "y": t.total})

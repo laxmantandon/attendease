@@ -328,7 +328,7 @@ def clock_in_today():
 
     if frappe.request.method =="GET":
         employee_id = get_employee_from_userid(user_email)
-        attendance_log = frappe.db.get_all("Attendance Log", fields=["name", "clock_in", "clock_out", "working_hours", "gps"], filters={"employee": employee_id, "posting_date": frappe.utils.today()})
+        attendance_log = frappe.db.get_all("Attendance Log", fields=["name", "clock_in", "clock_out", "working_hours", "gps"], filters={"employee": employee_id, "posting_date": frappe.utils.today(), "clock_out": ""})
         frappe.response["message"] = {
             "status":True,
             "message": "",
@@ -505,7 +505,109 @@ def dashboard():
         }
         return
 
+@frappe.whitelist(allow_guest=True)
+def birthdays():
+    
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
 
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    employee_id = get_employee_from_userid(user_email)
+        
+    if employee_id == False:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "User is not linked with Employee",
+            "user_email": user_email
+        }
+        return
+
+    if frappe.request.method =="GET":
+        
+        employees = frappe.db.sql("""
+            SELECT 
+            e.name, e.first_name, e.last_name, e.full_name, e.gender, e.company, e.date_of_birth, e.date_of_joining, e.employment_type,
+            e.mobile_no, e.user_id, e.emergency_contact_no
+            FROM tabEmployee e
+            LEFT JOIN `tabUser` u on u.name = e.user_id
+            WHERE  DATE_ADD(date_of_birth, 
+                            INTERVAL YEAR(CURDATE())-YEAR(date_of_birth)
+                                    + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(date_of_birth),1,0)
+                            YEAR)  
+                        BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+        """, as_dict=1)
+
+        if employees:
+
+            for e in employees:
+                user_image = get_doctype_images('User', e.user_id, 1)
+                
+                if user_image:
+                    e.image = user_image[0]['image']
+                    
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : employees
+        }
+        return
+    
+@frappe.whitelist(allow_guest=True)
+def new_joinees():
+    
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    employee_id = get_employee_from_userid(user_email)
+        
+    if employee_id == False:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "User is not linked with Employee",
+            "user_email": user_email
+        }
+        return
+
+    if frappe.request.method =="GET":
+        
+        employees = frappe.db.sql("""
+            SELECT 
+            e.name, e.first_name, e.last_name, e.full_name, e.gender, e.company, e.date_of_birth, e.date_of_joining, e.employment_type,
+            e.mobile_no, e.user_id, e.emergency_contact_no
+            FROM tabEmployee e
+            LEFT JOIN `tabUser` u on u.name = e.user_id
+            WHERE e.date_of_joining BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW()
+        """, as_dict=1)
+
+        if employees:
+
+            for e in employees:
+                user_image = get_doctype_images('User', e.user_id, 1)
+                
+                if user_image:
+                    e.image = user_image[0]['image']
+                    
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : employees
+        }
+        return
 
 def get_employee_from_userid(email):
     employee = frappe.db.get_all("Employee", fields=["name"], filters={"user_id": email})

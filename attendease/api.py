@@ -274,7 +274,7 @@ def clock_in():
             }
             return
         
-        log = frappe.db.get_all("Attendance Log", filters={"posting_date": _data.get("posting_date")}, fields=["name", "clock_in", "clock_out", "working_hours", "gps"], order_by='creation desc')
+        log = frappe.db.get_all("Attendance Log", filters={"posting_date": frappe.utils.today(), "clock_out": ""}, fields=["name", "clock_in", "clock_out", "working_hours", "gps"], order_by='creation desc')
         if len(log) > 0:
             frappe.response["message"] = {
                 "status":True,

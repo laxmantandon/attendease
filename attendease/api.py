@@ -277,7 +277,7 @@ def clock_in():
         log = frappe.db.get_all("Attendance Log", filters={"posting_date": frappe.utils.today(), "clock_out": ""}, fields=["name", "clock_in", "clock_out", "working_hours", "gps"], order_by='creation desc')
         if len(log) > 0:
             frappe.response["message"] = {
-                "status":True,
+                "status":False,
                 "message": "User Has Already Clocked In for the date",
                 "data": log[0]
             }

@@ -254,7 +254,7 @@ def clock_in():
 
     if frappe.request.method =="GET":
         employee_id = get_employee_from_userid(user_email)
-        attendance_log = frappe.db.get_all("Attendance Log", fields=["name","posting_date" "clock_in", "clock_out", "working_hours", "gps"], filters={"employee": employee_id})
+        attendance_log = frappe.db.get_all("Attendance Log", fields=["name","posting_date", "clock_in", "clock_out", "working_hours", "gps"], filters={"employee": employee_id})
         frappe.response["message"] = {
             "status":True,
             "message": "",

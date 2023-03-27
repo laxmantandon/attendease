@@ -436,6 +436,7 @@ def task_dashboard():
             SELECT
                 employee,
                 COUNT(*) total,
+                SUM(CASE WHEN `status` <> "Completed" THEN 1 ELSE 0 END) pending,
                 SUM(CASE WHEN `status` = "Completed" THEN 1 ELSE 0 END) completed,
                 SUM(CASE WHEN `status` = "Open" THEN 1 ELSE 0 END) `open`,
                 SUM(CASE WHEN `status` = "Working" THEN 1 ELSE 0 END) `working`,

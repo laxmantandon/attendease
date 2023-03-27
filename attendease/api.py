@@ -408,6 +408,56 @@ def task():
         return
 
 @frappe.whitelist(allow_guest=True)
+def task_dashboard():
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+
+    employee_id = get_employee_from_userid(user_email)
+        
+    if employee_id == False:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "User is not linked with Employee",
+            "user_email": user_email
+        }
+        return
+
+    if frappe.request.method =="GET":
+        
+        tasks = frappe.db.sql("""
+            SELECT
+                employee,
+                COUNT(*) total,
+                SUM(CASE WHEN `status` = "Completed" THEN 1 ELSE 0 END) completed,
+                SUM(CASE WHEN `status` = "Open" THEN 1 ELSE 0 END) `open`,
+                SUM(CASE WHEN `status` = "Working" THEN 1 ELSE 0 END) `working`,
+                SUM(CASE WHEN `status` = "Pending for Review" THEN 1 ELSE 0 END) review,
+                SUM(CASE WHEN `status` = "Cancelled" THEN 1 ELSE 0 END) cancelled,
+                SUM(CASE WHEN `status` = "Overdue" THEN 1 ELSE 0 END) overdue
+            FROM
+                tabTask
+            WHERE
+                employee = %s
+            GROUP BY employee
+        """, (employee_id), as_dict=1)
+                
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : tasks
+        }
+        return
+
+
+@frappe.whitelist(allow_guest=True)
 def task_type():
     api_key  = frappe.request.headers.get("Authorization")[6:21]
     api_sec  = frappe.request.headers.get("Authorization")[22:]

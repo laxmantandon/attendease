@@ -449,14 +449,34 @@ def task_dashboard():
                 employee = %s
             GROUP BY employee
         """, (employee_id), as_dict=1)
-                
-        frappe.response["message"] = {
-            "status":True,
-            "message": "",
-            "data" : tasks
-        }
-        return
-
+        
+        if tasks:        
+            frappe.response["message"] = {
+                "status":True,
+                "message": "",
+                "data" : tasks
+            }
+            return
+        else:
+            frappe.response["message"] = {
+                "status":True,
+                "message": "",
+                "data" : [
+                        {
+                            "employee": "",
+                            "total": 0,
+                            "pending": 0,
+                            "completed": 0,
+                            "open": 0,
+                            "working": 0,
+                            "review": 0,
+                            "cancelled": 0,
+                            "overdue": 0
+                            
+                        }
+                    ]
+            }
+            return            
 
 @frappe.whitelist(allow_guest=True)
 def task_type():

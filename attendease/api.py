@@ -680,6 +680,33 @@ def new_joinees():
         }
         return
 
+@frappe.whitelist(allow_guest=True)
+def user_list():
+    
+    api_key  = frappe.request.headers.get("Authorization")[6:21]
+    api_sec  = frappe.request.headers.get("Authorization")[22:]
+
+    user_email = get_user_info(api_key, api_sec)
+    if not user_email:
+        frappe.response["message"] = {
+            "status": False,
+            "message": "Unauthorised Access",
+        }
+        return
+    
+    if frappe.request.method =="GET":
+        
+        employees = frappe.db.sql("""
+            SELECT name, first_name, last_name, full_name FROM tabEmployee
+        """, as_dict=1)
+                    
+        frappe.response["message"] = {
+            "status":True,
+            "message": "",
+            "data" : employees
+        }
+        return
+
 def get_employee_from_userid(email):
     employee = frappe.db.get_all("Employee", fields=["name"], filters={"user_id": email})
     if employee: 

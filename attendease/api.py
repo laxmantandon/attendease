@@ -362,7 +362,11 @@ def task():
     
     elif frappe.request.method == "POST":
         _data = frappe.request.json
-        employee_id = get_employee_from_userid(user_email)
+        
+        if _data.get("employee"):
+            employee_id = _data.get("employee")
+        else:
+            employee_id = get_employee_from_userid(user_email)
         
         if employee_id == False:
             frappe.response["message"] = {
@@ -371,7 +375,7 @@ def task():
                 "user_email": user_email
             }
             return
-                
+        
         doc = frappe.get_doc({
             "doctype":"Task",
             "type": _data.get("type"),

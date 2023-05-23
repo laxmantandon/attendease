@@ -139,7 +139,8 @@ def validate_otp(mobile_no, otp):
                 "mobile_no": userm[0].mobile_no,
                 "email_id": userm[0].email,
                 "role": userm[0].user_type,
-                "image": _user_image
+                "image": _user_image,
+                "face_integration_id": userm[0].face_integration_id
             }
             }
             return

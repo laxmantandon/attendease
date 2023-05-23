@@ -25,7 +25,8 @@
   "column_break_16",
   "emergency_contact_no",
   "section_break_17",
-  "user_id"
+  "user_id",
+  "face_integration_id"
  ],
  "fields": [
   {
@@ -136,11 +137,16 @@
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "face_integration_id",
+   "fieldtype": "Data",
+   "label": "Face Integration Id"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-03-19 18:46:55.312069",
+ "modified": "2023-05-23 19:03:14.221192",
  "modified_by": "Administrator",
  "module": "attendease",
  "name": "Employee",

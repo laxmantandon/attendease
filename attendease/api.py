@@ -140,7 +140,7 @@ def validate_otp(mobile_no, otp):
                 "email_id": userm[0].email,
                 "role": userm[0].user_type,
                 "image": _user_image,
-                "face_integration_id": userm[0].face_integration_id
+                "face_integration_id": get_face_integration_id(userm[0].name)
             }
             }
             return
@@ -150,6 +150,10 @@ def validate_otp(mobile_no, otp):
             "status": False,
             "message": "User Not Exists",
         }
+
+def get_face_integration_id(user_id):
+    if user_id:
+        return frappe.db.get_all("Employee", fields=["name", "face_integration_id"], filters={"user_id": user_id})[0].get("face_integration_id")
 
 @frappe.whitelist(allow_guest=True)
 def reset_otp(mobile_no):
